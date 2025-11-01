@@ -1,0 +1,660 @@
+---
+title: \textcolor{blue}{STATISTICAL DATA ANALYSIS IN R}
+author: \textcolor{blue}{Statistical Computing in R}
+date: "***Lecturer:Ivan Innocent Sekibenga***"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+# \textcolor{red}{1. Statistical Data Analysis overview}
+
+Statistical data analysis is the process of collecting, organizing, analyzing, interpreting, and presenting data to uncover patterns and trends. It plays a vital role in various fields such as business, healthcare, social sciences, and more. R is a popular programming language for statistical data analysis due to its extensive libraries and packages that facilitate data manipulation, visualization, and modeling.
+
+Statistical data analysis is a crucial step in understanding and interpreting data. It involves various techniques and methods to summarize, visualize, and draw conclusions from data sets.
+
+## \textcolor{red}{1.1 Common Statistical Techniques in R}
+
+The common statistical techniques in R include;
+
+-   **descriptive statistics**:This technique involves summarizing and describing the main features of a data set. Common descriptive statistics include measures of central tendency (mean, median, mode) and measures of variability (standard deviation, variance, range).
+
+-   **correlation analysis**:This technique is used to measure the strength and direction of the relationship between two variables. The most common correlation coefficient is Pearson's correlation coefficient. Other types include Spearman's rank correlation and Kendall's tau.
+
+-   **inferential statistics**:This technique involves making inferences about a population based on a sample of data. Common inferential statistics techniques include confidence intervals, hypothesis testing, and regression analysis.
+
+-   **regression analysis**: This technique is used to model the relationship between a dependent variable and one or more independent variables. Common types of regression analysis include linear regression, logistic regression, and multiple regression.
+
+-   **hypothesis testing**: This technique is used to test a hypothesis about a population based on a sample of data. Common hypothesis testing techniques include t-tests, chi-square tests, and ANOVA.
+
+## \textcolor{red}{1.2 Assumptions and Prerequisites}
+
+Going forward, i assume that you have a basic statistical theory of these techniques and hence i will not go into the details of the statistical theory behind each technique. However, i will provide a brief overview of the assumptions and prerequisites for each technique where applicable. I will focus on the practical implementation of these techniques in R.
+
+## \textcolor{red}{2. Descriptive Statistics}
+
+Descriptive statistics provide a summary of the main features of a data set. Common descriptive statistics include measures of central tendency (mean, median, mode) and measures of variability (standard deviation, variance, range).
+
+## \textcolor{red}{When applicable:}
+
+-   During Exploratory Data Analysis (EDA) before applying complex models.
+
+-   When you need to summarize a large dataset into meaningful patterns.
+
+-   To understand basic structure, distribution, or detect outliers.
+
+## \textcolor{red}{Limitations:}
+
+-   Descriptive statistics do not make inferences beyond the given data.
+
+-   They ignore relationships between variables.
+
+-   Sensitive to outliers, especially the mean.
+
+## *Example 2.1*: one column vector data
+
+```{r}
+
+data <- c(10, 20, 30, 40, 50) # sample data 
+
+mean_value <- mean(data) # calculate mean
+median_value <- median(data)  # calculate median
+sd_value <- sd(data)     # calculate standard deviation
+
+mean_value     # print mean value
+median_value    # print median value
+sd_value       # print standard deviation
+```
+
+## *Example 2.2*: data frame of two variables
+
+```{r}
+data <- data.frame(height = c(150, 160, 170, 180, 190),
+                   weight = c(50, 60, 70, 80, 90))
+
+mean_height <- mean(data$height) # calculate mean height
+mean_weight <- mean(data$weight) # calculate mean weight
+                                 # $ accesses columns in data frame
+mean_height  # print mean height
+mean_weight  # print mean weight
+```
+
+## *Example 2.3*: Summary statistics for all variables in a data frame
+
+```{r}
+# Load the built-in dataset
+data(mtcars) # mtcars dataset contains information about various car models such as miles per gallon, horsepower, weight, etc.
+
+# Display summary statistics for all numeric columns
+summary(mtcars) 
+# summary() function provides a quick overview of the dataset,
+# including min, max, mean, median, and quartiles for each numeric column.
+```
+
+**Interpretation:**
+
+This gives minimum, 1st quartile, median, mean, 3rd quartile, and maximum — a quick overall picture of your dataset.
+
+## *Example 2.4*: Central tendency and spread
+
+```{r}
+# Calculate basic descriptive statistics for 'mpg' (miles per gallon)
+
+mean(mtcars$mpg)    # Mean (average value)
+median(mtcars$mpg)  # Median (middle value)
+sd(mtcars$mpg)      # Standard deviation (variability)
+var(mtcars$mpg)     # Variance
+range(mtcars$mpg)   # Minimum and maximum
+
+```
+
+**Interpretation:**
+
+The mean shows average fuel efficiency; SD and variance show how spread out mpg values are.
+
+## *Example 2.5*: Grouped summary using dplyr
+
+```{r}
+library(tidyverse) # helps to load dplyr for data manipulation
+
+# Group data by number of cylinders and summarize mpg
+mtcars %>%
+  group_by(cyl) %>%  
+  summarise(
+    Mean_MPG = mean(mpg),
+    SD_MPG = sd(mpg),
+    Count = n()
+  )
+
+```
+
+**Interpretation:**
+
+This shows how fuel efficiency (mpg) varies by engine size (cylinders). Cars with more cylinders tend to have lower fuel efficiency. Group summaries are crucial for comparisons across categories.
+
+## *Example 2.6*: Frequency distribution
+
+```{r}
+# Count frequency of each number of cylinders
+table(mtcars$cyl)
+
+```
+
+**Interpretation:**
+
+This shows how many cars have 4, 6, or 8 cylinders. Frequency distributions help understand the composition of categorical variables.
+
+# \textcolor{red}{3. Correlation Analysis}
+
+Correlation measures how strongly two numeric variables are related and the direction of their relationship (positive, negative, or none). The three common correlation coefficients are **Pearson's**, **Spearman's**, and **Kendall's**. Their values range from -1 to +1, where +1 indicates a perfect positive correlation, -1 indicates a perfect negative correlation, and 0 indicates no correlation.
+
+## \textcolor{red}{When applicable:}
+
+-   To explore whether two variables change together (e.g., income vs. education).
+
+-   Before regression, to check potential multicollinearity.
+
+-   During exploratory analysis for relationship detection.
+
+## \textcolor{red}{Limitations}
+
+-   Correlation does not imply causation.
+
+-   Pearson assumes linearity and normality.
+
+-   Spearman/Kendall measure monotonic, not necessarily linear, relationships.
+
+-   Sensitive to outliers.
+
+## *Example 3.1*: Pearson correlation
+
+```{r}
+# Compute Pearson correlation between mpg and horsepower
+cor(mtcars$mpg, mtcars$hp, method = "pearson")
+
+```
+
+**Interpretation:**
+
+A negative value indicates that as horsepower increases, miles per gallon decreases, suggesting an inverse relationship between engine power and fuel efficiency.
+
+## *Example 3.2*: Spearman correlation
+
+```{r}
+# Spearman correlation (rank-based, non-parametric)
+cor(mtcars$mpg, mtcars$wt, method = "spearman")
+
+```
+
+**Interpretation:**
+
+A negative value indicates that as weight increases, miles per gallon decreases, suggesting an inverse monotonic relationship between vehicle weight and fuel efficiency.
+
+## *Example 3.3*: Kendall’s Tau Correlation
+
+```{r}
+# Kendall correlation for small or ordinal data
+cor(mtcars$mpg, mtcars$qsec, method = "kendall")
+
+```
+
+**Interpretation:**
+
+A negative value indicates that as quarter-mile time increases, miles per gallon decreases, suggesting an inverse monotonic relationship between acceleration and fuel efficiency.
+
+## *Example 3.4*: Correlation matrix for multiple variables
+
+```{r}
+# Generate correlation matrix for selected variables
+cor(mtcars[, c("mpg", "hp", "wt", "qsec")])
+
+```
+
+**Interpretation:**
+
+This matrix shows pairwise correlations among multiple variables, helping identify which variables are strongly related. It uses Pearson's method by default.
+
+## *Example 3.5*: Visualizing correlations with a heatmap
+
+```{r}
+library(ggcorrplot) # for correlation heatmaps
+
+# Compute correlation matrix
+corr_matrix <- cor(mtcars[, c("mpg", "hp", "wt", "qsec")])
+
+# Plot correlation heatmap
+ggcorrplot(corr_matrix, method = "circle", type = "lower", lab = TRUE)
+
+```
+
+\newpage
+
+**Interpretation:**
+
+The heatmap visually represents the strength and direction of correlations among variables. Darker colors indicate stronger correlations, while lighter colors indicate weaker correlations.
+
+## *Example 3.6*: Scatterplot matrix
+
+Alternatively, We can also use GGally package for a more enhanced scatterplot matrix.
+
+```{r}
+# install.packages("GGally") # Uncomment if GGally is not installed
+
+library(GGally)
+ggpairs(mtcars[, c("mpg", "hp", "wt", "qsec")] )
+
+```
+
+**Interpretation:**
+
+The scatterplot matrix provides pairwise scatter plots for multiple variables, allowing visual assessment of relationships and potential correlations between them.
+
+## *Example 3.7*: Scatterplot matrix with color by species
+
+```{r}
+
+# Example using the iris dataset
+
+data(iris) # iris dataset contains measurements of iris flowers
+# from three different species namely: setosa, versicolor, and virginica.
+
+# Colorful scatter plot matrix
+ggpairs( iris,aes(color = Species),columns = 1:4) 
+
+```
+
+**Interpretation:**
+
+The scatterplot matrix shows pairwise relationships between the four measurements of iris flowers, colored by species. This helps visualize how different species cluster based on their measurements.
+
+# \textcolor{red}{4. Inferential Statistics}
+
+Inferential statistics allow us to make inferences about a population based on a sample of data. Common inferential statistics techniques include **confidence intervals** and **hypothesis testing**. In simple terms, Inferential statistics draw conclusions about populations based on sample data.They involve estimation (e.g., confidence intervals) and testing hypotheses about parameters.
+
+## \textcolor{red}{When applicable}
+
+-   When generalizing from a sample to a population.
+
+-   When testing hypotheses or comparing means/proportions.
+
+-   When estimating unknown parameters.
+
+## \textcolor{red}{Limitations}
+
+-   Assumes random sampling and representative data.
+
+-   Many tests require normality and equal variance.
+
+-   Misinterpretation of p-values is common.
+
+## *Example 4.1*: Confidence Interval for a Mean
+
+```{r}
+# 95% confidence interval for Sepal.Length
+t.test(iris$Sepal.Length)$conf.int
+
+```
+
+**Interpretation:**
+
+This interval estimates the range in which the true mean Sepal Length of the iris population lies with 95% confidence.
+
+## *Example 4.2*: One-sample t-Test
+
+```{r}
+# Test if mean Sepal.Length differs from 5.5
+
+t.test(iris$Sepal.Length, mu = 5.5)
+
+# Null hypothesis is  mean = 5.5, Alternative hypothesis is  mean is not 5.5
+# If p value is less than 0.05, reject the null; the true mean differs significantly from 5.5
+```
+
+**Interpretation:**
+
+The p-value indicates whether we can reject the null hypothesis that the mean Sepal Length is 5.5. A low p-value (\< 0.05) suggests a significant difference.
+
+## *Example 4.3*: Two-sample t-Test
+
+```{r}
+# Compare Sepal.Length between Setosa and Versicolor
+
+setosa <- subset(iris, Species == "setosa")$Sepal.Length
+versicolor <- subset(iris, Species == "versicolor")$Sepal.Length
+
+t.test(setosa, versicolor)
+
+```
+
+**Interpretation:**
+
+The p-value indicates whether there is a significant difference in mean Sepal Length between the two species. A low p-value (\< 0.05) suggests a significant difference. A p-value less than 0.05 implies there is a significant difference in average Sepal.Length between species.
+
+## *Example 4.4*: Chi-Square Test of Independence
+
+```{r}
+# Create a contingency table of Species vs. Sepal.Width category
+
+iris$Sepal.Width.Category <- ifelse(iris$Sepal.Width > 3.0, "Wide", "Narrow")
+
+contingency_table <- table(iris$Species, iris$Sepal.Width.Category)
+
+# Perform Chi-Square test
+chisq.test(contingency_table)
+
+```
+
+**Interpretation:**
+
+The p-value indicates whether there is a significant association between species and Sepal Width category. A low p-value (\< 0.05) suggests a significant association.
+
+# \textcolor{red}{5. Regression Analysis}
+
+Regression models the relationship between a dependent variable and one or more independent variables. Regression models are used for prediction and explanation.
+
+## \textcolor{red}{When applicable}
+
+-   To predict an outcome based on known factors.
+
+-   To estimate effect sizes of predictors.
+
+-   When examining relationships between continuous variables.
+
+## \textcolor{red}{Limitations}
+
+-   Assumes linearity, independence, and homoscedasticity.
+
+-   Sensitive to outliers.
+
+-   Multicollinearity can distort estimates.
+
+## *Example 5.1*: Simple Linear Regression
+
+```{r}
+# Model mpg as a function of weight
+model1 <- lm(mpg ~ wt, data = mtcars)
+
+# View summary of model
+
+summary(model1)
+
+```
+
+**Interpretation:**
+
+The summary provides coefficients, R-squared, and p-values. The coefficient for wt indicates how much mpg decreases for each unit increase in weight. A low p-value (\< 0.05) for wt suggests it is a significant predictor of mpg.
+
+Slope: change in mpg per unit of wt
+
+R²: proportion of variance explained
+
+p \< 0.05 implies predictor is significant.
+
+## *Example 5.2*: Multiple Linear Regression
+
+```{r}
+# Model mpg as function of multiple predictors
+model2 <- lm(mpg ~ wt + hp + cyl, data = mtcars)
+summary(model2)
+
+```
+
+**Interpretation:**
+
+The summary provides coefficients, R-squared, and p-values for each predictor. Each coefficient indicates the effect of that predictor on mpg, holding other variables constant. Low p-values (\< 0.05) suggest significant predictors.
+
+## *Example 5.3*: Diagonostic plots for Regression
+
+```{r}
+# Diagnostic plots for model2
+
+par(mfrow = c(2, 2)) # arrange plots in 2x2 grid
+
+plot(model2)
+
+```
+
+**Interpretation:**
+
+The diagnostic plots help assess model assumptions. Look for linearity, homoscedasticity, and normality of residuals. Deviations may indicate issues with the model fit. What to look for:
+
+-   **Residuals vs Fitted:** Look for random scatter (no patterns).This indicates linearity and homoscedasticity.
+
+-   **Normal Q-Q:** Points should follow the diagonal line. This indicates normality of residuals.
+
+-   **Scale-Location:** Look for horizontal line with equal spread.This indicates homoscedasticity.
+
+-   **Residuals vs Leverage:** Identify influential points.This helps detect outliers.
+
+## *Example 5.4*: Akaike Information Criterion (AIC) for Model Comparison
+
+AIC balances model fit and complexity. Lower AIC indicates a better model.
+
+```{r}
+# Compare model1 and model2 using AIC
+
+AIC(model1, model2)
+
+```
+
+**Interpretation:**
+
+The model with the lower AIC value is preferred, as it indicates a better balance between model fit and complexity.
+
+## *Example 5.5*: Predictions
+
+Predictions can be made using the fitted model.This is done using the `predict()` function.
+
+```{r}
+# Predict mpg for new observations
+
+newdata <- data.frame(wt = c(2, 3), hp = c(110, 150), cyl = c(4, 6))
+
+predict(model2, newdata)
+
+```
+
+**Interpretation:**
+
+The predicted mpg values for the new observations based on the fitted multiple regression model.Predicts expected mpg given car characteristics.
+
+## *Example 5.6*: Visualizing Regression lines
+
+You can also plot both models to visually compare their fits.
+
+```{r}
+# Plot data and both regression lines
+
+plot(mtcars$wt, mtcars$mpg, main = "MPG vs Weight with Regression Lines",
+     xlab = "Weight", ylab = "Miles Per Gallon", pch = 19, col = "blue")
+
+abline(model1, col = "red", lwd = 2) # Simple regression
+
+points(mtcars$wt, predict(model2), col = "green", pch = 17) # Multiple regression predictions
+
+legend("topright", legend = c("Data", "Simple Regression", "Multiple Regression"),
+       col = c("blue", "red", "green"), pch = c(19, NA, 17), lwd = c(NA, 2, NA))
+```
+
+## *Example 5.7*: Logistic Regression
+
+In logistic regression, the dependent variable is binary (0/1). It models the log-odds of the outcome as a linear combination of predictors.
+
+```{r}
+# Binary classification example
+iris$IsSetosa <- ifelse(iris$Species == "setosa", 1, 0)
+
+log_model <- glm(IsSetosa ~ Petal.Length, data = iris, family = binomial)
+
+summary(log_model)
+
+```
+
+**Interpretation:**
+
+The summary provides coefficients and p-values. The coefficient for Petal.Length indicates how the log-odds of being Setosa change with Petal Length. A low p-value (\< 0.05) suggests it is a significant predictor.
+
+# \textcolor{red}{6. Hypothesis Testing}
+
+Hypothesis testing is a statistical method used to make inferences about population parameters based on sample data. It involves formulating a null hypothesis(H~o~) and an alternative hypothesis (H~1~), collecting data, and using statistical tests to determine whether to reject or fail to reject the null hypothesis. Hypothesis testing evaluates assumptions about population parameters using sample data.
+
+## \textcolor{red}{When applicable}
+
+- To test group differences or associations.
+
+- When validating experimental or survey claims.
+
+- When comparing categorical frequencies.
+
+## \textcolor{red}{Limitations}
+
+- Results depend on sample size.
+
+- Violated assumptions may invalidate results.
+
+- Misinterpretation of p-values is common.
+
+## *Example 6.1*: One-Way ANOVA
+
+One way ANOVA tests for differences in means across multiple groups. For example, testing if mean weights differ across treatment groups.
+
+```{r}
+# Test difference in mean weights across groups
+
+data(PlantGrowth) 
+# PlantGrowth dataset contains weight measurements of plants under different treatment groups.
+
+anova_model <- aov(weight ~ group, data = PlantGrowth) # Perform one-way ANOVA
+
+summary(anova_model) # View ANOVA table
+
+```
+**Interpretation:**
+
+The p-value indicates whether there are significant differences in mean weights among the treatment groups. A low p-value (\< 0.05) suggests at least one group mean differs significantly.
+
+## *Example 6.2*: Two-Way ANOVA
+
+Two-way ANOVA tests for differences in means across two categorical factors. For example, testing if mean weights differ by treatment and time.
+```{r}
+# Test difference in mean weights across groups and time
+
+data(ToothGrowth) 
+# ToothGrowth dataset contains tooth length measurements of guinea pigs under different supplement types and doses. 
+
+anova_model2 <- aov(len ~ supp * dose, data = ToothGrowth) # Perform two-way ANOVA
+
+summary(anova_model2) # View ANOVA table
+
+```
+**Interpretation:**
+
+The p-values indicate whether there are significant differences in mean tooth lengths based on supplement type, dose, and their interaction. Low p-values (\< 0.05) suggest significant effects.
+
+## *Example 6.3*: Post-hoc tests
+If ANOVA indicates significant differences, post-hoc tests identify which groups differ.
+```{r}
+# install.packages("agricolae") # Uncomment if agricolae is not installed
+library(agricolae) # for post-hoc tests
+# agricolae package provides functions for agricultural research, including post-hoc tests.
+
+# Tukey's HSD post-hoc test for PlantGrowth data
+tukey_result <- HSD.test(anova_model, "group", group = TRUE)
+
+print(tukey_result)
+```
+
+**Interpretation:**
+
+The post-hoc test results indicate which treatment groups have significantly different mean weights. Groups sharing the same letter are not significantly different from each other.
+
+Another example of post-hoc test using the `TukeyHSD()` function:
+
+```{r}
+# Identify which groups differ
+TukeyHSD(anova_model)
+
+```
+**Interpretation:**
+
+The output shows pairwise comparisons between treatment groups, along with confidence intervals and p-values. Significant differences are indicated by p-values less than 0.05.
+
+## *Example 6.4*: Chi-Square test for Independence
+Chi-square test assesses whether two categorical variables are independent. For example, testing if gender is associated with survey response (yes/no).
+
+```{r}
+# Create contingency table
+gender_response <- matrix(c(30,10,20,40), nrow=2)
+rownames(gender_response) <- c("Male","Female")
+colnames(gender_response) <- c("Yes","No")
+
+# Test for independence
+chisq.test(gender_response)
+
+```
+**Interpretation:**
+
+The p-value indicates whether there is a significant association
+between gender and survey response. A low p-value (\< 0.05) suggests dependence.
+
+## *Example 6.5*: Wilcoxon Rank-Sum test
+
+The Wilcoxon rank-sum test (Mann-Whitney U test) is a non-parametric test used to compare two independent groups when the data does not meet the assumptions of a t-test, such as normality. It assesses whether the distributions of the two groups differ significantly.
+
+```{r}
+# Compare Sepal.Length between Setosa and Versicolor using Wilcoxon test 
+
+setosa <- subset(iris, Species == "setosa")$Sepal.Length
+
+versicolor <- subset(iris, Species == "versicolor")$Sepal.Length
+wilcox.test(setosa, versicolor)
+
+```
+**Interpretation:**
+
+The p-value indicates whether there is a significant difference in the distributions of Sepal Length between the two species. A low p-value (\< 0.05) suggests a significant difference.
+
+## *Example 6.6*: Kruskal-Wallis test
+
+The Kruskal-Wallis test is a non-parametric alternative to
+one-way ANOVA. It is used to compare three or more independent groups when the data does not meet the assumptions of ANOVA, such as normality. It assesses whether the distributions of the groups differ significantly.
+
+```{r}
+# Test difference in Sepal.Length across species using Kruskal-Wallis test 
+
+kruskal.test(Sepal.Length ~ Species, data = iris)
+
+```
+**Interpretation:**
+
+The p-value indicates whether there are significant differences in the distributions of Sepal Length among the species. A low p-value (\< 0.05) suggests at least one species differs significantly.
+
+## *Example 6.7*: Independent Two-Sample t-Test
+
+The independent two-sample t-test is used to compare the means of two independent groups. It assesses whether the means of the two groups are significantly different from each other.
+
+```{r}
+# Compare control vs treatment 2
+
+control <- subset(PlantGrowth, group=="ctrl")$weight
+
+trt2 <- subset(PlantGrowth, group=="trt2")$weight
+
+t.test(control, trt2)
+
+```
+**Interpretation:**
+
+The p-value indicates whether there is a significant difference in mean weights between the control and treatment 2 groups. A low p-value (\< 0.05) suggests a significant difference.
+
+# \textcolor{red}{7. Conclusion}
+
+Statistical data analysis in R encompasses a wide range of techniques for summarizing, visualizing, and modeling data.
+
+Descriptive statistics provide insights into data distribution, while correlation analysis reveals relationships between variables.
+Inferential statistics allow for population-level conclusions based on sample data, and regression analysis models relationships for prediction and explanation.
+Hypothesis testing evaluates assumptions about population parameters. 
+R's extensive libraries facilitate the practical implementation of these techniques, making it a powerful tool for statistical data analysis across various fields.
